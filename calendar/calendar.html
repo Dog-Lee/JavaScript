@@ -1,0 +1,161 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>日历</title>
+<link href="style/style.css" rel="stylesheet" type="text/css">
+<script>
+var calendar_month = new Date().getMonth() + 1;  //全局变量月份
+var calendar_year = new Date().getFullYear();	 //全局变量年份
+
+function $(elementId) {return document.getElementById(elementId);}
+
+//显示当前时间
+function showTime(month) {
+	var date = new Date();
+	//规定格式 00:00:00
+	var hour = date.getHours() < 10 ? "0" + date.getHours() : date.getHours();
+	var minute = date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes();
+	var second = date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds();
+	$("nowTime").innerHTML = hour+":"+minute+":"+second;
+}
+
+//显示当前日期
+function showDate() {
+	var date = new Date();
+	var year = date.getFullYear();
+	var month = date.getMonth() + 1;
+	var day = date.getDate();
+	$("nowDate").innerHTML = year+"年"+month+"月"+day+"日";
+}
+
+function loadDay(in_month) {
+	if (in_month > 0) {
+		if (in_month > 12) {
+			calendar_year++;
+			calendar_month = 1;
+		}
+	}
+	else {
+		if (calendar_month == 0) {
+			calendar_year--;
+			calendar_month = 12;
+		}
+	}
+	$("year_and_month").innerHTML = calendar_year+"年"+calendar_month+"月";
+	//var all_day;  出现undefined
+	var all_day = ""; //正确初始化   用来存放HTML字符串
+	var date = new Date(calendar_year,calendar_month-1,1);
+	var daysOfMonth = getDays(calendar_year, calendar_month);         //此月份的天数  
+	var daysOfLastMonth = getDays(calendar_year, calendar_month - 1);   //上个月的天数
+	var lastMonthStart = date.getDay() == 0 ? 7: date.getDay();    //日历星期一的号数
+	var divNum = 0;
+	var maxDiv = 42;  //微软日历显示最多显示42个格子
+	 
+	//补齐本月前的号数
+	for (var i = daysOfLastMonth - lastMonthStart+2; i <= daysOfLastMonth; i++) {
+		all_day += '<div class="other-month">'+i+"</div>";
+		divNum++;
+	}
+	//本月号数
+	for (var i = 1; i <= daysOfMonth; i++) {
+		all_day += '<div class="current-month">'+i+"</div>";
+		divNum++;
+	}
+	//补全余下号数
+	for (var i = 1; i <= maxDiv - divNum; i++) {
+		all_day += '<div class="other-month">'+i+"</div>";	
+	}
+	
+	$("day").innerHTML = all_day;
+	
+	var day_css = $("day").childNodes;
+	for (var i = 0; i < day_css.length; i++) {
+		day_css[i].onmouseover = function() {
+			this.style.border= "2px solid #FFFFFF";
+	
+		}
+		day_css[i].onmouseout = function() {
+			this.style.border= "2px solid #767676";
+		}
+		day_css[i].onclick = function() {
+			//bug：点击div后鼠标移出去蓝边框会消失
+			this.style.border= "2px solid #106EBE";
+		}
+	}
+	var nowDate = new Date();
+	
+	if (calendar_year == nowDate.getFullYear() && calendar_month == nowDate.getMonth() + 1) {
+		var today_css = document.getElementsByClassName("current-month");
+		today_css[nowDate.getDate() - 1].style.background = "#106EBE";
+	}
+}
+
+//获取月份的天数
+function getDays(year, month){	
+	var daysOfMonth = 0; //月份的天数
+	switch (month) {
+	case 1:
+	case 3:
+	case 5:
+	case 7:
+	case 8:
+	case 10:
+	case 12: daysOfMonth = 31; break;
+	case 2: daysOfMonth = ((year%4 == 0) && (year%100 != 0)) || (year%400 == 0) ? 29 : 28; break;
+	default : daysOfMonth = 30; 	
+	}
+	return daysOfMonth;
+}
+
+function init() {
+	showDate();
+	loadDay(calendar_month);
+	showTime();	
+	$("last").onmouseover = function () { this.style.color = "#FFFFFF" };
+	$("last").onmouseout = function () { this.style.color = "#999999" };
+	$("next").onmouseover = function () { this.style.color = "#FFFFFF" };
+	$("next").onmouseout = function () { this.style.color = "#999999" };
+	
+}
+setInterval("showTime()", 1000);
+
+window.onload = init;
+</script>
+</head>
+
+<body>
+<div class="calendar">
+
+  <div class="container">
+    <p id="nowTime" class="time"></p>
+    <p id="nowDate" class="date"></p>
+  </div>
+  
+  <hr size="1" noshade>
+  
+  <div class="container">
+    <div style="line-height: 30px; padding: 0 20px;">
+      <div id="year_and_month" style="float: left; color:#FFFFFF"></div>
+      <div id="last_next" style="float: right;">
+        <span id="last" class="text" onClick="loadDay(--calendar_month)"><a href="#"><</a></span>
+        <span id="next" class="text" onClick="loadDay(++calendar_month)"><a href="#">></a></span>
+      </div>
+      <div style="clear: both"></div>
+    </div>
+    <div class="title">
+      <div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div><div>日</div>
+    </div>
+    <!-- 存放日历HTML代码 -->
+    <div id="day" class="line"></div>
+  </div>
+  
+  <hr size="1" noshade>
+</div>
+</body>
+<script>
+
+
+
+</script>
+</html>
